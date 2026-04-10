@@ -47,6 +47,16 @@ const ui = {
     modelLoadingBox: document.getElementById('model-loading-box'),
     modelProgressText: document.getElementById('model-progress-text'),
     modelProgressBar: document.getElementById('model-progress-bar'),
+    aiEngineMode: document.getElementById('ai-engine-mode'),
+    photoroomKey: document.getElementById('photoroom-key'),
+    photoroomApiGroup: document.getElementById('photoroom-api-group'),
+    hfToken: document.getElementById('hf-token'),
+    hfApiGroup: document.getElementById('hf-api-group'),
+    removebgKey: document.getElementById('removebg-key'),
+    removebgApiGroup: document.getElementById('removebg-api-group'),
+    pixianUser: document.getElementById('pixian-user'),
+    pixianKey: document.getElementById('pixian-key'),
+    pixianApiGroup: document.getElementById('pixian-api-group'),
     strictMode: document.getElementById('strict-mode'),
     framesInput: document.getElementById('frames-input'),
     choiceModal: document.getElementById('choice-modal'),
@@ -54,6 +64,12 @@ const ui = {
     choiceFramesBtn: document.getElementById('choice-frames-btn'),
     choiceCancelBtn: document.getElementById('choice-cancel-btn'),
     exportRawBtn: document.getElementById('export-raw-btn'),
+    photoroomGroup: document.getElementById('photoroom-api-group'),
+    removebgGroup: document.getElementById('removebg-api-group'),
+    hfGroup: document.getElementById('hf-api-group'),
+    pixianGroup: document.getElementById('pixian-api-group'),
+    keysInput: document.getElementById('keys-file-input'),
+    importKeysBtn: document.getElementById('import-keys-btn'),
     fpsValue: document.getElementById('fps-val'),
     // Elementos del Gate
     loginGate: document.getElementById('login-gate'),
@@ -316,38 +332,20 @@ function initGoogleLogin() {
     // Solo inicializamos si es necesario manual.
 }
 
-/**
- * Decodificador de JWT robusto (Handle Unicode & base64url)
- */
-function decodeJwt(token) {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-    } catch (e) {
-        console.error("[CDR Security] Error decodificando JWT:", e);
-        return null;
-    }
-}
-
 // --- MANEJADOR GLOBAL DE GOOGLE (NO TOCAR) ---
 function handleGoogleResponse(response) {
     console.log("[CDR Admin] Recibida respuesta de Google...");
     try {
-        const payload = decodeJwt(response.credential);
-        if (!payload) throw new Error("Carga de credenciales vacía o corrupta.");
-        
+        const payload = JSON.parse(atob(response.credential.split('.')[1]));
         currentUser = payload;
+        
         console.log("[CDR Admin] Usuario identificado:", payload.email);
         
         // Cambio de pantalla: De Login a Llave de Licencia
         document.getElementById('gate-step-1').classList.add('hidden');
         document.getElementById('gate-step-2').classList.remove('hidden');
         document.getElementById('user-welcome').innerText = `BIENVENIDO, ${payload.name.toUpperCase()}`;
-        
+        // Pre-llenar nombre de usuario con el nombre de Google si está vacío
         if (ui.usernameInput) ui.usernameInput.value = payload.name;
     } catch (e) {
         console.error("[CDR Admin] Error procesando Google Login:", e);
@@ -480,30 +478,36 @@ function hideLoading() {
 
 // --- NÚCLEO DE IA SOBERANA V300 (UNLIMITED PRO) ---
 async function processAI(blob) {
-    if (!ui.removeBg || !ui.removeBg.checked) return blob; 
+    if (!ui.removeBg || !ui.removeBg.checked) return blob; // Blindaje contra Null
+
+    const mode = ui.aiEngineMode.value; 
+    const apiKey = ui.photoroomKey.value;
+    const hfToken = ui.hfToken.value;
+    const removebgKey = ui.removebgKey.value;
+    const pixianUser = ui.pixianUser.value;
+    const pixianKey = ui.pixianKey.value;
 
     try {
-        console.log("[CDR IA] Iniciando Motor de Esculpido...");
-        const result = await AIEngine.process(blob, {
+        return await AIEngine.process(blob, {
+            mode: mode,
+            apiKey: apiKey,
+            hfToken: hfToken,
+            removebgKey: removebgKey,
+            pixianUser: pixianUser,
+            pixianKey: pixianKey,
             strict: (ui.strictMode ? ui.strictMode.checked : true),
             onProgress: (res) => {
-                if (res.status === 'progress') {
+                if (res.status === 'progress' && mode === 'local') {
                     const p = Math.round(res.progress);
                     ui.modelProgressBar.style.width = `${p}%`;
-                    ui.modelProgressText.innerText = `Escaneando: ${p}%`;
+                    ui.modelProgressText.innerText = `${p}%`;
                     ui.modelLoadingBox.classList.remove('hidden');
                 }
             }
         });
-        
-        // Escondemos barra al terminar
-        setTimeout(() => ui.modelLoadingBox.classList.add('hidden'), 500);
-        return result;
     } catch (error) {
-        console.error("[CDR IA] FALLO CRÍTICO:", error);
-        ui.aiStatusIndicator.innerText = "Error en IA (Fallback)";
-        ui.aiStatusIndicator.className = "status-badge error";
-        return blob; 
+        console.error("Fallo motor híbrido:", error);
+        return blob; // Fallback al original
     }
 }
 
@@ -632,11 +636,12 @@ async function startAIProcessing(baseFrames, skipRatio = 1) {
         // Bucle secuencial con feedback visual
         for (let i = 0; i < baseFrames.length; i++) {
             const progress = Math.round(((i + 1) / baseFrames.length) * 100);
+            const engineLabel = ui.aiEngineMode.options[ui.aiEngineMode.selectedIndex].text;
             const skipAI = (ui.removeBg ? !ui.removeBg.checked : false);
             
             showLoading(
-                skipAI ? `Saltando IA...` : `CDR SOBERANA: IA ACTIVA`, 
-                skipAI ? `Manteniendo Cuadro ${i + 1} Original` : `Inyectando ADN CDR: Cuadro ${i + 1} / ${baseFrames.length} [V1000]`, 
+                skipAI ? `Saltando IA...` : `Inyectando ADN CDR...`, 
+                skipAI ? `Manteniendo Cuadro ${i + 1} Original` : `Esculpiendo Anime: Cuadro ${i + 1} / ${baseFrames.length} [V230]`, 
                 progress
             );
             
@@ -1192,11 +1197,116 @@ function openZoomModal(src) {
     document.body.appendChild(overlay);
 }
 
-// --- INICIALIZACIÓN DE MOTOR CDR ---
-initMasterAI();
+// --- INICIALIZACIÓN DE MOTOR HÍBRIDO ---
+async function initHybridAI() {
+    if (!ui.aiEngineMode) return;
+    
+    const defaultKey = ''; // Las llaves se cargan desde el archivo JSON del usuario o localStorage
+    const savedKey = localStorage.getItem('photoroom_api_key_v2');
+    
+    if (!savedKey && defaultKey) {
+        ui.photoroomKey.value = defaultKey;
+        localStorage.setItem('photoroom_api_key_v2', defaultKey);
+    } else if (savedKey) {
+        ui.photoroomKey.value = savedKey;
+    }
+    ui.photoroomKey.addEventListener('input', () => {
+        localStorage.setItem('photoroom_api_key_v2', ui.photoroomKey.value);
+    });
+
+    if (ui.aiEngineMode.value === 'local') {
+        initMasterAI();
+    }
+
+    const savedHF = localStorage.getItem('hf_client_token_v3');
+    if (savedHF) ui.hfToken.value = savedHF;
+    ui.hfToken.addEventListener('input', () => {
+        localStorage.setItem('hf_client_token_v3', ui.hfToken.value);
+    });
+
+    const savedRB = localStorage.getItem('removebg_api_key_v1');
+    if (savedRB) ui.removebgKey.value = savedRB;
+    ui.removebgKey.addEventListener('input', () => {
+        localStorage.setItem('removebg_api_key_v1', ui.removebgKey.value);
+    });
+
+    const sRB = 'NS4QaxbFXfWCfqm3WADQtbcJ';
+    const sPXU = 'pxnrrdhkfrgz24a';
+    const sPXK = 'rkias8171f3o7ip8aqk0fgfe3nviqk2o2098rr797sc5k0rv9atc';
+
+    if (!localStorage.getItem('removebg_api_key_v1')) {
+        localStorage.setItem('removebg_api_key_v1', sRB);
+        ui.removebgKey.value = sRB;
+    }
+    if (!localStorage.getItem('pixian_user_v1')) {
+        localStorage.setItem('pixian_user_v1', sPXU);
+        ui.pixianUser.value = sPXU;
+    }
+    if (!localStorage.getItem('pixian_key_v1')) {
+        localStorage.setItem('pixian_key_v1', sPXK);
+        ui.pixianKey.value = sPXK;
+    }
+
+    const savedPXU = localStorage.getItem('pixian_user_v1');
+    const savedPXK = localStorage.getItem('pixian_key_v1');
+    if (savedPXU) ui.pixianUser.value = savedPXU;
+    if (savedPXK) ui.pixianKey.value = savedPXK;
+
+    ui.pixianUser.addEventListener('input', () => localStorage.setItem('pixian_user_v1', ui.pixianUser.value));
+    ui.pixianKey.addEventListener('input', () => localStorage.setItem('pixian_key_v1', ui.pixianKey.value));
+
+    ui.aiEngineMode.addEventListener('change', () => {
+        const mode = ui.aiEngineMode.value;
+        ui.photoroomApiGroup.classList.toggle('hidden', mode !== 'cloud');
+        ui.hfApiGroup.classList.toggle('hidden', mode !== 'hf-cloud');
+        ui.removebgApiGroup.classList.toggle('hidden', mode !== 'removebg');
+        ui.pixianApiGroup.classList.toggle('hidden', mode !== 'pixian');
+        if (mode === 'local' || mode === 'local-server') initMasterAI();
+    });
+
+    async function loadRemoteConfig() {
+        try {
+            const resp = await fetch('.env');
+            if (!resp.ok) return;
+            const text = await resp.text();
+            const lines = text.split('\n');
+            lines.forEach(line => {
+                const [key, val] = line.split('=');
+                if (key && val) {
+                    const cleanVal = val.trim();
+                    if (key.includes('PHOTOROOM')) {
+                        ui.photoroomKey.value = cleanVal;
+                        localStorage.setItem('photoroom_api_key_v2', cleanVal);
+                    }
+                    if (key.includes('HF_TOKEN')) {
+                        ui.hfToken.value = cleanVal;
+                        localStorage.setItem('hf_client_token_v3', cleanVal);
+                    }
+                    if (key.includes('REMOVEBG_KEY')) {
+                        ui.removebgKey.value = cleanVal;
+                        localStorage.setItem('removebg_api_key_v1', cleanVal);
+                    }
+                    if (key.includes('PIXIAN_USER')) {
+                        ui.pixianUser.value = cleanVal;
+                        localStorage.setItem('pixian_user_v1', cleanVal);
+                    }
+                    if (key.includes('PIXIAN_KEY')) {
+                        ui.pixianKey.value = cleanVal;
+                        localStorage.setItem('pixian_key_v1', cleanVal);
+                    }
+                }
+            });
+            console.log("Config [.env] Inyectada con Éxito");
+        } catch (e) {
+            console.warn("No se encontró [.env] o error de lectura.");
+        }
+    }
+    loadRemoteConfig();
+}
 
 async function initMasterAI() {
     try {
+        const token = ui.hfToken.value;
         await AIEngine.init((res) => {
             if (res.status === 'progress') {
                 ui.modelLoadingBox.classList.remove('hidden');
@@ -1209,7 +1319,7 @@ async function initMasterAI() {
                 ui.modelLoadingBox.classList.add('hidden');
                 console.log("[App] IA Local Master Lista.");
             }
-        });
+        }, token);
     } catch (e) {
         console.error("Error cargando cerebro local:", e);
     }
@@ -1241,8 +1351,67 @@ ui.animFPS.oninput = () => {
     ui.fpsValue.innerText = ui.animFPS.value;
 };
 
-// --- CDR READY ---
-console.log("[CDR Master] Protocolos de UI listos.");
+// --- CONTROL DINÁMICO DE API KEYS (V323.9) ---
+function updateAIFields() {
+    const mode = ui.aiEngineMode.value;
+    
+    // Ocultar todo primero
+    ui.photoroomGroup.classList.add('hidden');
+    ui.removebgGroup.classList.add('hidden');
+    ui.hfGroup.classList.add('hidden');
+    ui.pixianGroup.classList.add('hidden');
+    
+    // Mostrar solo lo relevante
+    if (mode === 'photoroom') ui.photoroomGroup.classList.remove('hidden');
+    if (mode === 'removebg') ui.removebgGroup.classList.remove('hidden');
+    if (mode === 'hf-cloud') ui.hfGroup.classList.remove('hidden');
+    if (mode === 'pixian') ui.pixianGroup.classList.remove('hidden');
+}
+
+ui.aiEngineMode.onchange = updateAIFields;
+updateAIFields(); // Inicialización
+
+// --- SISTEMA DE IMPORTACIÓN DE KEYS CDR ---
+ui.importKeysBtn.onclick = () => ui.keysInput.click();
+
+ui.keysInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+
+        if (data.photoroom) ui.photoroomKey.value = data.photoroom;
+        if (data.removebg) ui.removebgKey.value = data.removebg;
+        if (data.huggingface) ui.hfToken.value = data.huggingface;
+        if (data.pixian_user) ui.pixianUser.value = data.pixian_user;
+        if (data.pixian_key) ui.pixianKey.value = data.pixian_key;
+
+        showHelp("🚀 Keys importadas con éxito. Ahora puedes seleccionar cualquier motor IA y tus credenciales estarán listas.");
+        updateAIFields();
+    } catch (err) {
+        alert("Fallo al leer el archivo de llaves. Asegúrate de que sea un JSON válido.");
+    }
+};
+
+// --- TOGGLE VISIBILIDAD DE KEYS (V324.0) ---
+document.querySelectorAll('.key-toggle').forEach(toggle => {
+    toggle.onclick = () => {
+        const targetId = toggle.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            toggle.innerText = '🔒';
+        } else {
+            input.type = 'password';
+            toggle.innerText = '👁️';
+        }
+    };
+});
+
+initHybridAI();
+initMasterAI();
 
 // --- NÚCLEO DEL RELOJ CDR (V3 PAUSABLE) ---
 let timerInterval = null;
