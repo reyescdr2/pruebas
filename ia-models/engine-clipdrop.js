@@ -23,3 +23,4 @@ const ClipdropEngine = {
         return await response.blob();
     }
 };
+

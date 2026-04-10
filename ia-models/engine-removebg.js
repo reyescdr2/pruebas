@@ -24,3 +24,4 @@ const RemoveBgEngine = {
         return await response.blob();
     }
 };
+

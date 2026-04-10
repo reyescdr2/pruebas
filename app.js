@@ -1452,3 +1452,4 @@ function startTemporalCountdown(key) {
         }
     }, 1000);
 }
+

@@ -7,3 +7,4 @@ window.CDR_CONFIG = {
     // Si es false, solo la primera vez que activan la llave.
     ALWAYS_REPORT: false
 };
+

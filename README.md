@@ -38,3 +38,4 @@ El proyecto utiliza un sistema de firmas digitales (SHA-256) para validar las ll
 
 ---
 *Desarrollado por CDR FOUNDATION*
+
