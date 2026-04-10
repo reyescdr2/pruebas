@@ -11,7 +11,7 @@ const AIEngine = (() => {
     /**
      * Inicialización del cerebro IA
      */
-    const init = async (onProgress) => {
+    const init = async (onProgress, token = '') => {
         if (segmenter) return segmenter;
         if (isLoading) {
             return new Promise(resolve => {
@@ -23,22 +23,37 @@ const AIEngine = (() => {
 
         isLoading = true;
         try {
-            console.log("[CDR IA] Cargando Red Neuronal SOBERANA...");
+            console.log("[CDR IA] Cargando Red Neuronal SOBERANA (Auth Mode)...");
             const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest');
             
             env.allowLocalModels = false;
             env.useBrowserCache = true;
+            
+            // Inyectamos el token si existe para evitar errores 401
+            if (token) {
+                console.log("[CDR IA] Usando Token de Autorización HF.");
+                env.remoteHost = 'https://huggingface.co/';
+                env.remotePathTemplate = '{model}/resolve/{revision}/{file}';
+                // El token se pasa en las opciones del pipeline en versiones recientes
+            }
 
             const modelId = 'Xenova/rmbg-1.4';
             
-            segmenter = await pipeline('image-segmentation', modelId, {
+            const pipelineOptions = {
                 device: 'webgpu',
                 progress_callback: (res) => { if (onProgress) onProgress(res); }
-            }).catch(async (err) => {
-                console.warn("[CDR IA] WebGPU no disponible, usando CPU...", err);
+            };
+
+            // Si hay token, lo añadimos a las peticiones (Hugging Face Auth)
+            if (token) {
+                pipelineOptions.hf_token = token;
+            }
+
+            segmenter = await pipeline('image-segmentation', modelId, pipelineOptions).catch(async (err) => {
+                console.warn("[CDR IA] WebGPU no disponible o error de red, usando CPU...", err);
                 return await pipeline('image-segmentation', modelId, {
-                    device: 'cpu',
-                    progress_callback: (res) => { if (onProgress) onProgress(res); }
+                    ...pipelineOptions,
+                    device: 'cpu'
                 });
             });
 

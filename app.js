@@ -48,6 +48,7 @@ const ui = {
     modelProgressText: document.getElementById('model-progress-text'),
     modelProgressBar: document.getElementById('model-progress-bar'),
     strictMode: document.getElementById('strict-mode'),
+    hfToken: document.getElementById('hf-token'),
     framesInput: document.getElementById('frames-input'),
     choiceModal: document.getElementById('choice-modal'),
     choiceGifBtn: document.getElementById('choice-gif-btn'),
@@ -1197,7 +1198,7 @@ initMasterAI();
 
 async function initMasterAI() {
     try {
-        const token = ui.hfToken.value;
+        const token = ui.hfToken ? ui.hfToken.value : '';
         await AIEngine.init((res) => {
             if (res.status === 'progress') {
                 ui.modelLoadingBox.classList.remove('hidden');
