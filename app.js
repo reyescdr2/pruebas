@@ -1184,14 +1184,26 @@ ui.confirmBtn.onclick = async () => {
     }
 };
 
-// --- SISTEMA DE ZOOM DINÁMICO (V70) ---
 function openZoomModal(src) {
     const overlay = document.createElement('div');
-    overlay.className = 'zoom-overlay';
+    // MODO BLINDAJE: CSS INLINE con Z-Index Absoluto Máximo (Ignora cachés rotas)
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;z-index:2147483647;cursor:zoom-out;animation:zoom-fade-in 0.3s ease;';
+    
+    // Inyectamos también los keyframes necesarios si no existen
+    if (!document.getElementById('zoom-anim-styles')) {
+        const style = document.createElement('style');
+        style.id = 'zoom-anim-styles';
+        style.textContent = `
+            @keyframes zoom-fade-in { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes zoom-pop-in { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        `;
+        document.head.appendChild(style);
+    }
+
     overlay.innerHTML = `
-        <div class="zoom-content">
-            <img src="${src}" alt="Zoom">
-            <p style="margin-top:10px; font-weight:800; color:var(--primary);">PULSA PARA CERRAR</p>
+        <div style="text-align:center; max-height:95vh; max-width:95vw; animation:zoom-pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <img src="${src}" alt="Zoom" style="max-height:80vh; max-width:100%; border:3px solid #ff0000; border-radius:18px; box-shadow:0 0 60px rgba(255,0,0,0.7); object-fit:contain;">
+            <p style="margin-top:15px; font-weight:900; color:#ff0000; font-size:1.1rem; letter-spacing:2px; text-shadow:0 0 15px rgba(255,0,0,1);">👆 HAZ CLIC PARA CERRAR 👆</p>
         </div>
     `;
     overlay.onclick = () => document.body.removeChild(overlay);
