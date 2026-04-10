@@ -1,4 +1,0 @@
-rembg[gpu] # Versión optimizada (quita [gpu] si no tienes NVIDIA)
-pillow
-numpy
-onnxruntime # Requerido por rembg para inferencia
