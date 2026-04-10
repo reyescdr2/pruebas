@@ -83,11 +83,18 @@ const AIEngine = (() => {
             const mData = mask.data;
             const channels = mask.channels || 1;
 
-            // Detector de inversión de máscara
-            const corners = [0, W - 1, (H - 1) * W, H * W - 1];
-            let cornerSum = 0;
-            corners.forEach(c => cornerSum += mData[c * channels]);
-            const isInverted = (cornerSum / 4) > 200;
+            // Detector de inversión de máscara mejorado (V1001)
+            // Analiza los bordes para determinar si el fondo es claro u oscuro en la máscara
+            const sampleEdges = [
+                0, W/2, W-1, // Arriba
+                (H/2)*W, (H/2)*W + (W-1), // Centro
+                (H-1)*W, (H-1)*W + W/2, H*W-1 // Abajo
+            ];
+            let edgeSum = 0;
+            sampleEdges.forEach(idx => edgeSum += mData[Math.floor(idx) * channels]);
+            const isInverted = (edgeSum / sampleEdges.length) > 128;
+
+            console.log(`[CDR IA] Modo Máscara: ${isInverted ? 'INVERTIDA' : 'ESTÁNDAR'} (Score: ${Math.round(edgeSum/sampleEdges.length)})`);
 
             const canvas = document.createElement('canvas');
             canvas.width = W; canvas.height = H;
@@ -97,7 +104,7 @@ const AIEngine = (() => {
             const imageData = ctx.getImageData(0, 0, W, H);
             const pixels = imageData.data;
 
-            // Motor de esculpido CDR (Diamond Shave)
+            // Motor de esculpido CDR (V1001: Precision Shave)
             for (let i = 0; i < pixels.length; i += 4) {
                 const pixelIdx = i / 4;
                 const dataIdx = pixelIdx * channels;
@@ -105,23 +112,16 @@ const AIEngine = (() => {
                 let prob = mData[dataIdx];
                 if (isInverted) prob = 255 - prob;
 
-                // Protecciones de color (Skin Guard)
-                const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
-                const isBright = (r > 240 && g > 240 && b > 240);
-                
-                if (isBright && prob > 100) prob = Math.max(prob, 230);
-
-                // Sigmoide de transparencia radical
+                // Aplicación de Alfa con suavizado de bordes
                 let alpha = 0;
-                const threshold = strict ? 180 : 150;
-                
-                if (prob > threshold) {
+                if (prob > 200) {
                     alpha = 255;
-                } else if (prob < 20) {
+                } else if (prob < 30) {
                     alpha = 0;
                 } else {
-                    const normalized = prob / 255;
-                    alpha = Math.round(Math.pow(normalized, strict ? 1.8 : 1.2) * 255);
+                    // Curva sigma para bordes suaves en cabello/objetos
+                    const normalized = (prob - 30) / (200 - 30);
+                    alpha = Math.round(normalized * 255);
                 }
 
                 pixels[i + 3] = alpha;

@@ -483,19 +483,26 @@ async function processAI(blob) {
     if (!ui.removeBg || !ui.removeBg.checked) return blob; 
 
     try {
-        return await AIEngine.process(blob, {
+        console.log("[CDR IA] Iniciando Motor de Esculpido...");
+        const result = await AIEngine.process(blob, {
             strict: (ui.strictMode ? ui.strictMode.checked : true),
             onProgress: (res) => {
                 if (res.status === 'progress') {
                     const p = Math.round(res.progress);
                     ui.modelProgressBar.style.width = `${p}%`;
-                    ui.modelProgressText.innerText = `${p}%`;
+                    ui.modelProgressText.innerText = `Escaneando: ${p}%`;
                     ui.modelLoadingBox.classList.remove('hidden');
                 }
             }
         });
+        
+        // Escondemos barra al terminar
+        setTimeout(() => ui.modelLoadingBox.classList.add('hidden'), 500);
+        return result;
     } catch (error) {
-        console.error("Fallo motor unificado CDR:", error);
+        console.error("[CDR IA] FALLO CRÍTICO:", error);
+        ui.aiStatusIndicator.innerText = "Error en IA (Fallback)";
+        ui.aiStatusIndicator.className = "status-badge error";
         return blob; 
     }
 }
