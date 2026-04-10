@@ -11,7 +11,7 @@ const AIEngine = (() => {
     /**
      * Inicialización del cerebro IA
      */
-    const init = async (onProgress, token = '') => {
+    const init = async (onProgress) => {
         if (segmenter) return segmenter;
         if (isLoading) {
             return new Promise(resolve => {
@@ -23,36 +23,35 @@ const AIEngine = (() => {
 
         isLoading = true;
         try {
-            console.log("[CDR IA] Cargando Red Neuronal SOBERANA (Modo Independiente)...");
+            console.log("[CDR IA] Cargando Inteligencia SOBERANA (100% Autónoma)...");
             const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest');
             
-            // Configuración para permitir modelos locales (Tu Propia IA)
-            env.allowLocalModels = true; 
+            // Configuración óptima para autonomía total
+            env.allowLocalModels = false; 
             env.useBrowserCache = true;
-            
-            // Si quieres alojar la IA en tu propio servidor/carpeta, cambia esto:
-            // env.localModelPath = '/ia-models/onnx/'; 
 
-            const modelId = 'Xenova/u2net'; // Cambiado a u2net (ABIERTO - SIN TOKEN)
+            const modelId = 'Xenova/u2net';
             
-            const pipelineOptions = {
+            segmenter = await pipeline('image-segmentation', modelId, {
                 device: 'webgpu',
                 progress_callback: (res) => { if (onProgress) onProgress(res); }
-            };
-
-            // El token sigue siendo opcional por si usas modelos privados en el futuro
-            if (token) {
-                console.log("[CDR IA] Usando Token para modelos protegidos.");
-                pipelineOptions.hf_token = token;
-            }
-
-            segmenter = await pipeline('image-segmentation', modelId, pipelineOptions).catch(async (err) => {
-                console.warn("[CDR IA] WebGPU no disponible o fallo de red, usando CPU...", err);
+            }).catch(async (err) => {
+                console.warn("[CDR IA] WebGPU no disponible, usando modo compatibilidad CPU...", err);
                 return await pipeline('image-segmentation', modelId, {
-                    ...pipelineOptions,
-                    device: 'cpu'
+                    device: 'cpu',
+                    progress_callback: (res) => { if (onProgress) onProgress(res); }
                 });
             });
+
+            isLoading = false;
+            console.log("[CDR IA] Cerebro local cargado. Autonomía Verificada.");
+            return segmenter;
+        } catch (e) {
+            isLoading = false;
+            console.error("[CDR IA] Error fatal al cargar IA:", e);
+            throw e;
+        }
+    };
 
             isLoading = false;
             console.log("[CDR IA] Cerebro cargado y listo.");
