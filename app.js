@@ -149,18 +149,19 @@ function signTimedData(key, seconds) {
 
 function verifyLicenseKey(inputKey, userEmail) {
     const key = inputKey.trim().toUpperCase();
-    console.log("[CDR Debug] Validando llave:", key);
+    const keyHash = signData(key);
+    console.log("[CDR Debug] Validando llave:", key, "Hash:", keyHash);
     
-    // 0. COMPROBAR REGISTRO OFICIAL (NUEVO V4)
-    if (!window.CDR_REGISTERED_KEYS || !window.CDR_REGISTERED_KEYS.includes(key)) {
-        console.error("[CDR Admin] Llave NO encontrada en el registro oficial:", key);
+    // 0. COMPROBAR REGISTRO OFICIAL (NUEVO V4 - HASH SYNC)
+    if (!window.CDR_REGISTERED_KEYS || !window.CDR_REGISTERED_KEYS.includes(keyHash)) {
+        console.error("[CDR Admin] Hash NO encontrado en el registro oficial:", keyHash);
         if (!window.CDR_REGISTERED_KEYS) console.error("[CDR Admin] ERROR: window.CDR_REGISTERED_KEYS no está definido. ¿Carga fallida?");
         return "NOT_FOUND"; 
     }
 
-    // 1. COMPROBAR BLACKLIST
-    if (window.CDR_BLACKLIST && window.CDR_BLACKLIST.includes(key)) {
-        console.warn("[CDR Admin] Acceso bloqueado (Blacklist):", key);
+    // 1. COMPROBAR BLACKLIST (HASH SYNC)
+    if (window.CDR_BLACKLIST && window.CDR_BLACKLIST.includes(keyHash)) {
+        console.warn("[CDR Admin] Acceso bloqueado (Blacklist):", keyHash);
         return "BLACKLISTED";
     }
 
