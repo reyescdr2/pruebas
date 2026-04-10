@@ -23,34 +23,31 @@ const AIEngine = (() => {
 
         isLoading = true;
         try {
-            console.log("[CDR IA] Cargando Red Neuronal SOBERANA (Auth Mode)...");
+            console.log("[CDR IA] Cargando Red Neuronal SOBERANA (Modo Independiente)...");
             const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@latest');
             
-            env.allowLocalModels = false;
+            // Configuración para permitir modelos locales (Tu Propia IA)
+            env.allowLocalModels = true; 
             env.useBrowserCache = true;
             
-            // Inyectamos el token si existe para evitar errores 401
-            if (token) {
-                console.log("[CDR IA] Usando Token de Autorización HF.");
-                env.remoteHost = 'https://huggingface.co/';
-                env.remotePathTemplate = '{model}/resolve/{revision}/{file}';
-                // El token se pasa en las opciones del pipeline en versiones recientes
-            }
+            // Si quieres alojar la IA en tu propio servidor/carpeta, cambia esto:
+            // env.localModelPath = '/ia-models/onnx/'; 
 
-            const modelId = 'Xenova/rmbg-1.4';
+            const modelId = 'Xenova/u2net'; // Cambiado a u2net (ABIERTO - SIN TOKEN)
             
             const pipelineOptions = {
                 device: 'webgpu',
                 progress_callback: (res) => { if (onProgress) onProgress(res); }
             };
 
-            // Si hay token, lo añadimos a las peticiones (Hugging Face Auth)
+            // El token sigue siendo opcional por si usas modelos privados en el futuro
             if (token) {
+                console.log("[CDR IA] Usando Token para modelos protegidos.");
                 pipelineOptions.hf_token = token;
             }
 
             segmenter = await pipeline('image-segmentation', modelId, pipelineOptions).catch(async (err) => {
-                console.warn("[CDR IA] WebGPU no disponible o error de red, usando CPU...", err);
+                console.warn("[CDR IA] WebGPU no disponible o fallo de red, usando CPU...", err);
                 return await pipeline('image-segmentation', modelId, {
                     ...pipelineOptions,
                     device: 'cpu'
