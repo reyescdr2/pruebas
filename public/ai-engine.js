@@ -53,15 +53,6 @@ const AIEngine = (() => {
         }
     };
 
-            isLoading = false;
-            console.log("[CDR IA] Cerebro cargado y listo.");
-            return segmenter;
-        } catch (e) {
-            isLoading = false;
-            console.error("[CDR IA] Error fatal al cargar IA:", e);
-            throw e;
-        }
-    };
 
     /**
      * Procesamiento de imagen (Remoción de fondo diamante)

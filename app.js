@@ -1209,7 +1209,7 @@ async function initMasterAI() {
                 ui.modelLoadingBox.classList.add('hidden');
                 console.log("[App] IA Local Master Lista.");
             }
-        }, token);
+        });
     } catch (e) {
         console.error("Error cargando cerebro local:", e);
     }
