@@ -5,5 +5,5 @@ window.CDR_CONFIG = {
     
     // Si es true, enviará el registro cada vez que entren. 
     // Si es false, solo la primera vez que activan la llave.
-    ALWAYS_REPORT: false
+    ALWAYS_REPORT: true
 };
