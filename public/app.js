@@ -47,16 +47,6 @@ const ui = {
     modelLoadingBox: document.getElementById('model-loading-box'),
     modelProgressText: document.getElementById('model-progress-text'),
     modelProgressBar: document.getElementById('model-progress-bar'),
-    aiEngineMode: document.getElementById('ai-engine-mode'),
-    photoroomKey: document.getElementById('photoroom-key'),
-    photoroomApiGroup: document.getElementById('photoroom-api-group'),
-    hfToken: document.getElementById('hf-token'),
-    hfApiGroup: document.getElementById('hf-api-group'),
-    removebgKey: document.getElementById('removebg-key'),
-    removebgApiGroup: document.getElementById('removebg-api-group'),
-    pixianUser: document.getElementById('pixian-user'),
-    pixianKey: document.getElementById('pixian-key'),
-    pixianApiGroup: document.getElementById('pixian-api-group'),
     strictMode: document.getElementById('strict-mode'),
     framesInput: document.getElementById('frames-input'),
     choiceModal: document.getElementById('choice-modal'),
@@ -64,12 +54,6 @@ const ui = {
     choiceFramesBtn: document.getElementById('choice-frames-btn'),
     choiceCancelBtn: document.getElementById('choice-cancel-btn'),
     exportRawBtn: document.getElementById('export-raw-btn'),
-    photoroomGroup: document.getElementById('photoroom-api-group'),
-    removebgGroup: document.getElementById('removebg-api-group'),
-    hfGroup: document.getElementById('hf-api-group'),
-    pixianGroup: document.getElementById('pixian-api-group'),
-    keysInput: document.getElementById('keys-file-input'),
-    importKeysBtn: document.getElementById('import-keys-btn'),
     fpsValue: document.getElementById('fps-val'),
     // Elementos del Gate
     loginGate: document.getElementById('login-gate'),
@@ -478,26 +462,13 @@ function hideLoading() {
 
 // --- NÚCLEO DE IA SOBERANA V300 (UNLIMITED PRO) ---
 async function processAI(blob) {
-    if (!ui.removeBg || !ui.removeBg.checked) return blob; // Blindaje contra Null
-
-    const mode = ui.aiEngineMode.value; 
-    const apiKey = ui.photoroomKey.value;
-    const hfToken = ui.hfToken.value;
-    const removebgKey = ui.removebgKey.value;
-    const pixianUser = ui.pixianUser.value;
-    const pixianKey = ui.pixianKey.value;
+    if (!ui.removeBg || !ui.removeBg.checked) return blob; 
 
     try {
         return await AIEngine.process(blob, {
-            mode: mode,
-            apiKey: apiKey,
-            hfToken: hfToken,
-            removebgKey: removebgKey,
-            pixianUser: pixianUser,
-            pixianKey: pixianKey,
             strict: (ui.strictMode ? ui.strictMode.checked : true),
             onProgress: (res) => {
-                if (res.status === 'progress' && mode === 'local') {
+                if (res.status === 'progress') {
                     const p = Math.round(res.progress);
                     ui.modelProgressBar.style.width = `${p}%`;
                     ui.modelProgressText.innerText = `${p}%`;
@@ -506,8 +477,8 @@ async function processAI(blob) {
             }
         });
     } catch (error) {
-        console.error("Fallo motor híbrido:", error);
-        return blob; // Fallback al original
+        console.error("Fallo motor unificado CDR:", error);
+        return blob; 
     }
 }
 
@@ -636,12 +607,11 @@ async function startAIProcessing(baseFrames, skipRatio = 1) {
         // Bucle secuencial con feedback visual
         for (let i = 0; i < baseFrames.length; i++) {
             const progress = Math.round(((i + 1) / baseFrames.length) * 100);
-            const engineLabel = ui.aiEngineMode.options[ui.aiEngineMode.selectedIndex].text;
             const skipAI = (ui.removeBg ? !ui.removeBg.checked : false);
             
             showLoading(
-                skipAI ? `Saltando IA...` : `Inyectando ADN CDR...`, 
-                skipAI ? `Manteniendo Cuadro ${i + 1} Original` : `Esculpiendo Anime: Cuadro ${i + 1} / ${baseFrames.length} [V230]`, 
+                skipAI ? `Saltando IA...` : `CDR SOBERANA: IA ACTIVA`, 
+                skipAI ? `Manteniendo Cuadro ${i + 1} Original` : `Inyectando ADN CDR: Cuadro ${i + 1} / ${baseFrames.length} [V1000]`, 
                 progress
             );
             

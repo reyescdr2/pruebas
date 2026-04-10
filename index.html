@@ -124,59 +124,14 @@
                     </div>
                 </div>
 
-                <!-- Barra de carga para IA Local -->
+                <!-- PANEL DE IA UNIFICADO (NUESTRA) -->
                 <div id="model-loading-box" class="hidden" style="margin-top:12px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
                     <div class="flex-row justify-between" style="font-size: 11px; margin-bottom: 8px;">
-                        <span style="color: #ff0000;">Cargando Cerebro Master...</span>
+                        <span style="color: #ff0000; font-weight: 800; letter-spacing: 1px;">IA CDR SOBERANA EN PROCESO...</span>
                         <span id="model-progress-text">0%</span>
                     </div>
                     <div class="progress-container" style="height: 6px; background: rgba(0,0,0,0.3);">
                         <div id="model-progress-bar" class="progress-bar" style="width: 0%; background: linear-gradient(90deg, #ff0000, #990000);"></div>
-                    </div>
-                </div>
-
-                <!-- PANEL DE IA CDR ENHANCED -->
-                <div class="cdr-ai-panel" style="margin-top: 20px;">
-                    <div class="flex-row justify-between" style="gap: 10px; align-items: flex-end;">
-                        <div style="flex: 1;">
-                            <span style="font-size: 11px; color: #ff0000; font-weight: bold; display: block; margin-bottom: 5px;">MOTOR IA ACTIVO:</span>
-                            <select id="ai-engine-mode" class="glass-input ai-select" style="width: 100%; font-size: 10px; padding: 6px 10px; height: 38px;">
-                                <option value="local" selected>🚀 CDR Local Master</option>
-                                <option value="pixian">💎 Pixian.ai (HD Pro)</option>
-                                <option value="photoroom">📸 PhotoRoom</option>
-                                <option value="removebg">✂️ Remove.bg</option>
-                                <option value="hf-cloud">☁️ HF Cloud</option>
-                            </select>
-                        </div>
-                        <div>
-                            <button id="import-keys-btn" class="btn-secondary">📥 Subir Key</button>
-                            <input type="file" id="keys-file-input" accept=".json" hidden>
-                        </div>
-                    </div>
-                    
-                    <!-- CONTENEDOR DE API KEYS CDR -->
-                    <div id="api-keys-container" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-                        <div id="photoroom-api-group" class="input-group" style="position: relative;">
-                            <input type="password" id="photoroom-key" placeholder="PhotoRoom API Key" class="glass-input key-input" style="font-size: 10px; padding: 6px; padding-right: 30px; width: 100%;">
-                            <span class="key-toggle" data-target="photoroom-key">👁️</span>
-                        </div>
-                        <div id="removebg-api-group" class="input-group" style="position: relative;">
-                            <input type="password" id="removebg-key" placeholder="Remove.bg API Key" class="glass-input key-input" style="font-size: 10px; padding: 6px; padding-right: 30px; width: 100%;">
-                            <span class="key-toggle" data-target="removebg-key">👁️</span>
-                        </div>
-                        <div id="hf-api-group" class="input-group" style="position: relative;">
-                            <input type="password" id="hf-token" placeholder="HF Token (HuggingFace)" class="glass-input key-input" style="font-size: 10px; padding: 6px; padding-right: 30px; width: 100%;">
-                            <span class="key-toggle" data-target="hf-token">👁️</span>
-                        </div>
-                        <div id="pixian-api-group" class="input-group flex-row" style="gap: 5px;">
-                            <div style="position: relative; flex: 1;">
-                                <input type="password" id="pixian-user" placeholder="Pixian User" class="glass-input key-input" style="font-size: 10px; padding: 6px; padding-right: 30px; width: 100%;">
-                                <span class="key-toggle" data-target="pixian-user">👁️</span>
-                            </div>
-                            <div style="position: relative; flex: 1;">
-                                <input type="password" id="pixian-key" placeholder="Pixian Key" class="glass-input key-input" style="font-size: 10px; padding: 6px; padding-right: 30px; width: 100%;">
-                                <span class="key-toggle" data-target="pixian-key">👁️</span>
-                            </div>
                     </div>
                 </div>
 
@@ -297,14 +252,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
-    <!-- ARQUITECTURA MODULAR V500 -->
-    <script src="ia-models/engine-mediapipe.js"></script>
-    <script src="ia-models/engine-birefnet.js"></script>
-    <script src="ia-models/engine-hf.js"></script>
-    <script src="ia-models/engine-photoroom.js"></script>
-    <script src="ia-models/engine-removebg.js"></script>
-    <script src="ia-models/engine-pixian.js"></script>
-    <script src="ia-models/engine-clipdrop.js"></script>
+    <!-- ARQUITECTURA SOBERANA UNIFICADA -->
     <script src="ai-engine.js"></script>
     <script src="app.js"></script>
     <div class="glow-bg"></div>

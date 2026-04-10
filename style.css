@@ -295,33 +295,6 @@ body {
     gap: 0.5rem;
 }
 
-.cdr-ai-panel {
-    background: rgba(146, 0, 0, 0.05);
-    border: 1px solid rgba(146, 0, 0, 0.3);
-    padding: 1.5rem;
-    border-radius: 16px;
-    box-shadow: 0 0 20px rgba(146, 0, 0, 0.1), inset 0 0 10px rgba(146, 0, 0, 0.05);
-    transition: all 0.3s ease;
-}
-
-.cdr-ai-panel:hover {
-    border-color: rgba(255, 0, 0, 0.5);
-    box-shadow: 0 0 30px rgba(146, 0, 0, 0.2);
-}
-
-.ai-select {
-    background: rgba(20, 0, 0, 0.8) !important;
-    border: 1px solid var(--primary) !important;
-    color: #ff0000 !important;
-    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-    cursor: pointer;
-}
-
-.ai-select option {
-    background: #1a0000;
-    color: white;
-}
-
 .input-group label {
     font-size: 0.9rem;
     color: #a0aec0;
