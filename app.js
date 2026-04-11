@@ -522,8 +522,8 @@ async function extractGifFrames(blob) {
         const reader = new GifReader(new Uint8Array(await blob.arrayBuffer()));
         const width = reader.width, height = reader.height;
         const totalF = reader.numFrames();
-        // V85.0: Calibración Maestra (16 cuadros max - Basado en Copia Funcional)
-        const targetFrames = 16; 
+        // V90.0: Fidelidad Extendida CDR (32 cuadros max para animaciones complejas)
+        const targetFrames = 32; 
         const skip = Math.max(1, Math.round(totalF / targetFrames)); 
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
