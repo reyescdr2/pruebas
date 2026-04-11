@@ -1569,3 +1569,6 @@ function startTemporalCountdown(key) {
     }, 1000);
 }
 
+// --- INITIALIZE SECURITY ---
+checkAuth();
+
