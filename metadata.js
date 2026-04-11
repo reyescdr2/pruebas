@@ -13,5 +13,10 @@ window.CDR_METADATA = {
         "type": "SINGLE",
         "id": "CDR-S-6445-B371-94DD-628A",
         "created": 1776455644
+    },
+    "0A9FDD2CD86C6779023FCD68A1AA6EE76F7C3D0DDEAC3C50A8EB586786757F49": {
+        "type": "PREMIUM",
+        "id": "CDR-P-75YD-93E6-F32A-B736",
+        "created": 1775934902
     }
 };
