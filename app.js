@@ -469,8 +469,12 @@ function showLoading(title, text, progress = 0) {
     ui.loadingOverlay.classList.remove('hidden');
     ui.loadingText.innerText = title;
     ui.loadingSubtext.innerText = text;
-    ui.progressBar.style.width = `${progress}%`;
-    ui.progressPercent.innerText = `${progress}%`;
+    
+    const bar = document.getElementById('progress-bar');
+    const percent = document.getElementById('progress-percent');
+    
+    if (bar) bar.style.width = `${progress}%`;
+    if (percent) percent.innerText = `${progress}%`;
 }
 
 function hideLoading() {
