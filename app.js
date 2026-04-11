@@ -522,9 +522,10 @@ async function extractGifFrames(blob) {
         const reader = new GifReader(new Uint8Array(await blob.arrayBuffer()));
         const width = reader.width, height = reader.height;
         const totalF = reader.numFrames();
-        // V55.0: Optimización Crítica para Bedrock (16 cuadros para máximo rendimiento)
-        const targetFrames = 16; 
-        const skip = Math.max(1, Math.round(totalF / targetFrames)); 
+        // V60.0: Aumento de límite para animaciones fluidas (64 cuadros max)
+        // Solo saltamos frames si el GIF es extremadamente pesado para Bedrock
+        const targetFrames = 64; 
+        const skip = Math.max(1, Math.floor(totalF / targetFrames)); 
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
         tempCanvas.width = width; tempCanvas.height = height;
