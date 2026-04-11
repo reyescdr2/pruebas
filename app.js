@@ -759,13 +759,13 @@ ui.choiceGifBtn.addEventListener('click', (e) => {
     }, 100);
 });
 
-ui.choiceFramesBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    closeChoiceModal();
-    setTimeout(() => {
-        ui.framesInput.click();
-    }, 100);
-});
+// ui.choiceFramesBtn.addEventListener('click', (e) => {
+//    e.stopPropagation();
+//    closeChoiceModal();
+//    setTimeout(() => {
+//        ui.framesInput.click();
+//    }, 100);
+// });
 
 ui.choiceCancelBtn.addEventListener('click', (e) => {
     e.stopPropagation();
