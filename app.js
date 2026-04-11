@@ -1152,10 +1152,33 @@ ui.confirmBtn.onclick = async () => {
         }
 
         // 7. ITEM TEXTURE (INVENTARIO 2D)
+        let itemTexRef = "textures/item/item1";
+        
+        if (files.icon) {
+            // Si el usuario subió un ícono (ej. un totem default), lo usamos para el inventario/item frame para evitar deformaciones
+            itemFolder.file(`custom_icon.png`, files.icon);
+            itemTexRef = "textures/item/custom_icon";
+        } else {
+            // Emparejar la proporción a 1:1 (cuadrado) para evitar que Minecraft lo aplaste en el marco y hotbar
+            const size = Math.max(fW, fH);
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.src = URL.createObjectURL(frames[0]);
+            await new Promise(r => img.onload = r);
+            const x = (size - fW) / 2;
+            const y = (size - fH) / 2;
+            ctx.drawImage(img, x, y, fW, fH);
+            const squareBlob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+            itemFolder.file('_icon_2d.png', await squareBlob.arrayBuffer());
+            itemTexRef = "textures/item/_icon_2d";
+        }
+
         zip.folder('textures').file('item_texture.json', JSON.stringify({
             resource_pack_name: pName,
             texture_name: "atlas.items",
-            texture_data: { "totem": { textures: "textures/item/item1" } }
+            texture_data: { "totem": { textures: itemTexRef } }
         }, null, 2));
 
         // 8. AUDIO (RECONSTRUCCIÓN FORENSE V324.2)
