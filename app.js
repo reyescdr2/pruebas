@@ -1212,9 +1212,9 @@ ui.confirmBtn.onclick = async () => {
                     geometry: "Geometry.default", 
                     materials: [{ "*": "variable.is_enchanted ? material.enchanted : material.default" }],
                     textures: [
-                        // Sincronización Forense de Alta Precisión (V326):
-                        // Usamos el valor exacto del input para que coincida con la detección del GIF original.
-                        `array.item_frames[math.mod(math.floor(query.time_stamp * ${parseFloat(ui.animFPS.value || 10).toFixed(2)}), ${frames.length})]`,
+                        // Sincronización Estilo Clásico CDR (Referencia Pack Funcional):
+                        // query.life_time es más estable para evitar aceleraciones por tiempo de servidor.
+                        `array.item_frames[math.mod(math.floor(query.life_time * ${parseFloat(ui.animFPS.value || 10).toFixed(1)}), ${frames.length})]`,
                         "texture.enchanted"
                     ]
                 }
