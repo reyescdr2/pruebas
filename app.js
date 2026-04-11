@@ -552,18 +552,18 @@ async function extractGifFrames(blob) {
             prevFrameInfo = frameInfo;
         }
 
-        // --- AUTO-DETECCIÓN DE FPS (V325 DURATION-SYNC) ---
         let finalFPS = 10;
         if (totalDelay > 0) {
             // Formula: (Num_Cuadros_Finales * 100) / Delay_Total_Original
             finalFPS = (frameBlobs.length * 100) / totalDelay;
         } else {
-            // Si el GIF no tiene delay registrado, aplicar un default sano según la cantidad de cuadros resultante
+            // Si el GIF no tiene delay registrado, aplicar un default sano
             finalFPS = Math.max(1, Math.min(24, frameBlobs.length));
         }
 
-        ui.animFPS.value = Math.max(1, Math.min(24, Math.round(finalFPS)));
-        return { width, height, frames: frameBlobs, skipRatio: skip };
+        // Calibración de Precisión CDR: No redondear agresivamente para evitar desincronización
+        ui.animFPS.value = Math.max(1, Math.min(24, finalFPS)).toFixed(2);
+        return { width, height, frames: frameBlobs, skipRatio: skip, detectedFPS: finalFPS };
     } catch (e) {
         throw new Error("Error leyendo GIF: " + e.message);
     }
@@ -1210,9 +1210,9 @@ ui.confirmBtn.onclick = async () => {
                     geometry: "Geometry.default", 
                     materials: [{ "*": "variable.is_enchanted ? material.enchanted : material.default" }],
                     textures: [
-                        // Sincronización Forense (V355 - Bucle Continuo sin Micro-Cortes):
-                        // math.floor elimina inconsistencias de coma flotante entre frames.
-                        `array.item_frames[math.mod(math.floor(query.time_stamp * ${parseFloat(ui.animFPS.value).toFixed(1)}), ${frames.length})]`,
+                        // Sincronización Forense de Alta Precisión (V326):
+                        // Usamos el valor exacto del input para que coincida con la detección del GIF original.
+                        `array.item_frames[math.mod(math.floor(query.time_stamp * ${parseFloat(ui.animFPS.value || 10).toFixed(2)}), ${frames.length})]`,
                         "texture.enchanted"
                     ]
                 }
