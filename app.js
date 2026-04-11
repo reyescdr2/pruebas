@@ -1143,8 +1143,8 @@ ui.confirmBtn.onclick = async () => {
                     geometry: "Geometry.default", 
                     materials: [{ "*": "variable.is_enchanted ? material.enchanted : material.default" }],
                     textures: [
-                        // Sincronización Forense: Molang truncará automáticamente el índice
-                        `array.item_frames[query.life_time * ${parseFloat(ui.animFPS.value).toFixed(1)}]`,
+                        // Sincronización Forense (V350 - Seguro Bedrock): math.mod garantiza bucle infinito sin depender del motor nativo
+                        `array.item_frames[math.mod(query.life_time * ${parseFloat(ui.animFPS.value).toFixed(1)}, ${frames.length})]`,
                         "texture.enchanted"
                     ]
                 }
