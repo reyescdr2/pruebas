@@ -1216,9 +1216,10 @@ ui.confirmBtn.onclick = async () => {
                     geometry: "Geometry.default", 
                     materials: [{ "*": "variable.is_enchanted ? material.enchanted : material.default" }],
                     textures: [
-                        // Sincronización Estilo Clásico CDR (Referencia Pack Funcional):
-                        // query.life_time es más estable para evitar aceleraciones por tiempo de servidor.
-                        `array.item_frames[math.mod(math.floor(query.life_time * ${parseFloat(ui.animFPS.value || 10).toFixed(1)}), ${frames.length})]`,
+                        // Sincronización de Fluidez Ultra (V335 - ANTI-STUTTER):
+                        // math.floor(q.life_time * FPS) garantiza que cada frame dure exactamente lo mismo.
+                        // math.mod asegura un bucle infinito circular sin micro-saltos al reiniciar.
+                        `array.item_frames[math.mod(math.floor(query.life_time * ${parseFloat(ui.animFPS.value || 10).toFixed(2)}), ${frames.length})]`,
                         "texture.enchanted"
                     ]
                 }
