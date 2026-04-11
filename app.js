@@ -792,6 +792,8 @@ ui.audioChoiceCancel.addEventListener('click', (e) => {
 
 ui.audioChoiceModal.addEventListener('click', (e) => {
     if (e.target === ui.audioChoiceModal) ui.audioChoiceModal.classList.add('hidden');
+});
+
 ui.framesInput.onchange = (e) => {
     // Deprecated for direct upload. Handled via sync now.
     if (e.target.files.length) handleMultipleFiles(e.target.files);
