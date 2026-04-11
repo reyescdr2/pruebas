@@ -559,7 +559,6 @@ async function extractGifFrames(blob) {
         }
 
         ui.animFPS.value = Math.max(1, Math.min(24, Math.round(finalFPS)));
-        document.getElementById('fps-val').innerText = ui.animFPS.value;
         return { width, height, frames: frameBlobs, skipRatio: skip };
     } catch (e) {
         throw new Error("Error leyendo GIF: " + e.message);
@@ -934,7 +933,6 @@ async function handleMultipleFiles(fileList) {
     // Si subes 3 frames, se pondrá a 3 FPS (1 loop por segundo). Evita que 3 frames vayan a 10 FPS (flasheo).
     let autoFps = Math.max(1, Math.min(24, sortedFiles.length));
     ui.animFPS.value = autoFps;
-    if (ui.fpsValue) ui.fpsValue.innerText = autoFps;
     
     ui.visualPreview.innerHTML = `<div class="audio-info">🖼️ ${sortedFiles.length} Cuadros Cargados</div>`;
     ui.visualPreview.style.display = 'block';
