@@ -1143,8 +1143,9 @@ ui.confirmBtn.onclick = async () => {
                     geometry: "Geometry.default", 
                     materials: [{ "*": "variable.is_enchanted ? material.enchanted : material.default" }],
                     textures: [
-                        // Sincronización Forense (V350 - Seguro Bedrock): math.mod garantiza bucle infinito sin depender del motor nativo
-                        `array.item_frames[math.mod(query.life_time * ${parseFloat(ui.animFPS.value).toFixed(1)}, ${frames.length})]`,
+                        // Sincronización Forense (V355 - Bucle Continuo sin Micro-Cortes):
+                        // math.floor elimina inconsistencias de coma flotante entre frames.
+                        `array.item_frames[math.mod(math.floor(query.time_stamp * ${parseFloat(ui.animFPS.value).toFixed(1)}), ${frames.length})]`,
                         "texture.enchanted"
                     ]
                 }
