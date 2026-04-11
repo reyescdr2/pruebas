@@ -94,7 +94,7 @@ const EngineBiRefNet = (() => {
             const imageData = ctx.getImageData(0, 0, W, H);
             const pixels = imageData.data;
 
-            // --- ESCULPIDO ANIME V1250 (Hilo-Fino + Skin Guard) ---
+            // --- ESCULPIDO DIAMANTE CDR V1500 (Bisturí de Alta Fidelidad) ---
             for (let i = 0; i < pixels.length; i += 4) {
                 const pixelIdx = i / 4;
                 const dataIdx = pixelIdx * channels;
@@ -104,47 +104,52 @@ const EngineBiRefNet = (() => {
                 let prob = mData[dataIdx];
                 if (isInverted) prob = 255 - prob;
 
-                // 1. SKIN-GUARD (Protector de Sujeto Anime)
+                // 1. SKIN-GUARD CDR (Protector de Sujeto)
                 const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
-                const isSkin = (r > 190 && g > 150 && b > 120 && r > b + 20); // Detección de tonos durazno/piel
-                const isBright = (r > 240 && g > 240 && b > 240); // Evitar comerse brillos extremos
+                // Detección de tonos humanos/anime (durazno/piel)
+                const isSkin = (r > 180 && g > 140 && b > 110 && r > b + 15); 
+                const isBright = (r > 235 && g > 235 && b > 235); 
                 
-                let alpha = 0;
-                
-                // Si es piel o brillo y la IA duda (prob > 80), lo protegemos
-                if ((isSkin || isBright) && prob > 80) {
-                    prob = Math.max(prob, 210); // Forzamos a que se mantenga
+                if ((isSkin || isBright) && prob > 60) {
+                    prob = Math.max(prob, 230); // Protección reforzada
                 }
 
-                // 2. HALO-SHAVE (Erosión 1px Forense V1300)
-                // Si estamos en un borde y hay "vacío" cerca, recortamos agresivamente
-                const edgeThreshold = strict ? 220 : 200;
-                const shaveFactor = strict ? 0.15 : 0.4; // 0.15 es recorte radical en modo estricto
+                // 2. HALO-SHAVE ULTRA (Erosión Diamante V1500)
+                // Aumentamos el contraste de la máscara cerca de los bordes
+                const edgeThreshold = strict ? 235 : 210;
+                const shaveFactor = strict ? 0.05 : 0.25; // 0.05 es recorte QUIRÚRGICO
                 
-                if (prob < edgeThreshold && prob > 30) {
+                if (prob < edgeThreshold && prob > 20) {
                     let hasVoid = false;
-                    // Escaneo rápido de 4 vecinos (Cruz)
-                    if (x > 0 && mData[(pixelIdx - 1) * channels] < 30) hasVoid = true;
-                    if (x < W - 1 && mData[(pixelIdx + 1) * channels] < 30) hasVoid = true;
-                    if (y > 0 && mData[(pixelIdx - W) * channels] < 30) hasVoid = true;
-                    if (y < H - 1 && mData[(pixelIdx + W) * channels] < 30) hasVoid = true;
+                    // Escaneo extendido de 8 vecinos (Caja) para máxima limpieza de halos
+                    const neighbors = [-1, 1, -W, W, -W-1, -W+1, W-1, W+1];
+                    for (let n of neighbors) {
+                        const ni = pixelIdx + n;
+                        if (ni >= 0 && ni < mData.length / channels && mData[ni * channels] < 15) {
+                            hasVoid = true;
+                            break;
+                        }
+                    }
                     
                     if (hasVoid) {
                         prob = Math.round(prob * shaveFactor); 
                     }
                 }
 
-                // Aplicación final con Sigmoide Suave pero afilado
-                const upperLimit = strict ? 200 : 180;
-                const lowerLimit = strict ? 25 : 15;
+                // 3. CURVA DE AFLIADO (BORDE DE DIAMANTE)
+                // Aplicamos una curva sigmoide agresiva para que el borde sea sólido
+                let alpha = 0;
+                const upperLimit = strict ? 220 : 190;
+                const lowerLimit = strict ? 40 : 25;
 
                 if (prob > upperLimit) {
                     alpha = 255;
                 } else if (prob < lowerLimit) {
                     alpha = 0;
                 } else {
-                    const normalized = prob / 255;
-                    const power = strict ? 1.5 : 0.9; // Potencia más alta = bordes más delgados
+                    const normalized = (prob - lowerLimit) / (upperLimit - lowerLimit);
+                    // Elevamos a una potencia para "adelgazar" los bordes semitransparentes
+                    const power = strict ? 2.5 : 1.8; 
                     alpha = Math.round(Math.pow(normalized, power) * 255);
                 }
 
