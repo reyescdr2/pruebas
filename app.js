@@ -785,7 +785,21 @@ ui.audioChoiceModal.addEventListener('click', (e) => {
 
 ui.framesInput.onchange = (e) => {
     if (e.target.files.length) handleMultipleFiles(e.target.files);
-};
+}
+
+// --- PROTECCIÓN FORENSE (ANTI-PERMISSION-DENIED) ---
+async function cloneToMemory(fileOrBlob) {
+    if (!fileOrBlob) return null;
+    try {
+        const buf = await fileOrBlob.arrayBuffer();
+        const clone = new Blob([buf], { type: fileOrBlob.type });
+        clone.name = fileOrBlob.name;
+        return clone;
+    } catch(e) {
+        console.warn("[CDR Auto-Fix] No se pudo clonar a RAM:", e);
+        return fileOrBlob;
+    }
+}
 
 async function handleMultipleFiles(fileList) {
     let sortedFiles = [];
@@ -826,7 +840,12 @@ async function handleMultipleFiles(fileList) {
         }
     } else {
         // Modo normal: Múltiples archivos seleccionados
-        sortedFiles = Array.from(fileList).sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+        showLoading('Protegiendo Memoria...', 'Asegurando Archivos contra Borrado Móvil...');
+        let rawFiles = Array.from(fileList).sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+        for (const raw of rawFiles) {
+            sortedFiles.push(await cloneToMemory(raw));
+        }
+        hideLoading();
     }
 
     // --- V325 FORENSIC SAMPLING: Límite de 24 cuadros para subida manual ---
@@ -853,7 +872,11 @@ async function handleMultipleFiles(fileList) {
     ui.generateBtn.disabled = false;
 }
 
-function handleFile(file, type) {
+async function handleFile(rawFile, type) {
+    // Clonar a memoria permanentemente para prevenir cambios de permiso del dispositivo móvil
+    const file = await cloneToMemory(rawFile);
+    if (!file) return;
+
     const url = URL.createObjectURL(file);
     let dz;
     if (type === 'visual') {
