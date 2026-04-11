@@ -865,6 +865,12 @@ async function handleMultipleFiles(fileList) {
     files.visual = sortedFiles[0]; 
     originalFrames = sortedFiles;
     
+    // --- AUTO-AJUSTE DINÁMICO DE FPS MÚLTIPLES ---
+    // Si subes 3 frames, se pondrá a 3 FPS (1 loop por segundo). Evita que 3 frames vayan a 10 FPS (flasheo).
+    let autoFps = Math.max(1, Math.min(24, sortedFiles.length));
+    ui.animFPS.value = autoFps;
+    if (ui.fpsValue) ui.fpsValue.innerText = autoFps;
+    
     ui.visualPreview.innerHTML = `<div class="audio-info">🖼️ ${sortedFiles.length} Cuadros Cargados</div>`;
     ui.visualPreview.style.display = 'block';
     ui.visualDropzone.classList.add('selected-glow');
