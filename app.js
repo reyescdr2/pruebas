@@ -522,9 +522,18 @@ async function extractGifFrames(blob) {
         const reader = new GifReader(new Uint8Array(await blob.arrayBuffer()));
         const width = reader.width, height = reader.height;
         const totalF = reader.numFrames();
-        // V90.0: Fidelidad Extendida CDR (32 cuadros max para animaciones complejas)
-        const targetFrames = 32; 
-        const skip = Math.max(1, Math.round(totalF / targetFrames)); 
+        // V100.0: Selector Inteligente CDR (IA Dinámica)
+        // La IA decide: si el GIF es corto, no quitamos nada. 
+        // Si es largo, optimizamos proporcionalmente para no perder la esencia.
+        let skip = 1;
+        if (totalF > 32) {
+            // Si tiene más de 32 cuadros, empezamos a optimizar suavemente
+            skip = Math.ceil(totalF / 32); 
+        } else if (totalF > 16) {
+            // Entre 16 y 32 cuadros, evaluamos si vale la pena saltar 1 de cada 2
+            // para una fluidez óptima en dispositivos gama baja.
+            skip = (totalF > 24) ? 2 : 1;
+        }
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
         tempCanvas.width = width; tempCanvas.height = height;
