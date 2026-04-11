@@ -635,6 +635,10 @@ async function startAIProcessing(baseFrames, skipRatio = 1) {
 
         ui.previewModal.classList.remove('hidden');
         ui.galleryView.classList.remove('hidden');
+        
+        // V700: Mostrar botón de Sync Manual sobre la IA defectuosa
+        const syncBtnRef = document.getElementById('sync-frames-btn');
+        if(syncBtnRef) syncBtnRef.style.display = 'block';
 
         ui.confirmBtn.disabled = true;
         ui.confirmBtn.innerText = 'ESPERANDO LIMPIEZA TOTAL...';
@@ -788,10 +792,62 @@ ui.audioChoiceCancel.addEventListener('click', (e) => {
 
 ui.audioChoiceModal.addEventListener('click', (e) => {
     if (e.target === ui.audioChoiceModal) ui.audioChoiceModal.classList.add('hidden');
+ui.framesInput.onchange = (e) => {
+    // Deprecated for direct upload. Handled via sync now.
+    if (e.target.files.length) handleMultipleFiles(e.target.files);
+}
+
+// --- FASE 2: TOMA DE CONTROL DE FOTOGRAMAS (SYNC) ---
+const syncFramesInput = document.getElementById('sync-frames-input');
+const syncFramesBtn = document.getElementById('sync-frames-btn');
+
+syncFramesBtn.addEventListener('click', () => {
+    syncFramesInput.click();
 });
 
-ui.framesInput.onchange = (e) => {
-    if (e.target.files.length) handleMultipleFiles(e.target.files);
+syncFramesInput.onchange = async (e) => {
+    if (e.target.files.length) {
+        showLoading('Sincronizando Cuadros...', 'Alineando manual a los tiempos del GIF Master...');
+        await overwriteFramesWithManual(e.target.files);
+        hideLoading();
+    }
+};
+
+async function overwriteFramesWithManual(fileList) {
+    let sortedFiles = [];
+    let rawFiles = Array.from(fileList).sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+    
+    // Solo tomamos tantos fotogramas como haya extraído el GIF base (globalPackData.frames.length)
+    // para mantener el empalme 1:1.
+    const maxFrames = globalPackData ? globalPackData.frames.length : rawFiles.length;
+    
+    for (let i = 0; i < Math.min(rawFiles.length, maxFrames); i++) {
+        sortedFiles.push(await cloneToMemory(rawFiles[i]));
+    }
+    
+    // Rellenamos globalPackData con las nuevas imágenes en memoria pura
+    globalPackData.frames = sortedFiles;
+    
+    // Volvemos a dibujar las tarjetas en la Supervisión pero marcando "SYNC FRAME"
+    ui.framesGridView.innerHTML = '';
+    sortedFiles.forEach((_, idx) => {
+        const card = document.createElement('div');
+        card.className = 'frame-card';
+        card.id = `card-frame-${idx}`;
+        const frameUrl = URL.createObjectURL(sortedFiles[idx]);
+        card.innerHTML = `
+            <div class="frame-label" style="color: #ffcc00; border-bottom: 2px solid #ffcc00;">FRAME ${idx + 1} (SYNC)</div>
+            <div class="frame-orig-view" style="display:none;"></div>
+            <div class="frame-proc-view text-center" style="grid-column: span 2;">
+                <span style="font-size: 0.5rem; position: absolute; top: 2px; left: 2px; background: rgba(255,204,0,0.7); color: black; font-weight: bold; padding: 1px 3px; border-radius: 3px; z-index: 10;">MANUAL OVERRIDE</span>
+                <img id="proc-frame-${idx}" src="${frameUrl}" alt="Synced ${idx}" style="filter: none; opacity: 1;">
+            </div>
+        `;
+        ui.framesGridView.appendChild(card);
+    });
+
+    ui.confirmBtn.disabled = false;
+    ui.confirmBtn.innerText = 'EMPACAR SINCRONIZACIÓN AHORA';
 }
 
 // --- PROTECCIÓN FORENSE (ANTI-PERMISSION-DENIED) ---
