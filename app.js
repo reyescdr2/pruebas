@@ -522,10 +522,9 @@ async function extractGifFrames(blob) {
         const reader = new GifReader(new Uint8Array(await blob.arrayBuffer()));
         const width = reader.width, height = reader.height;
         const totalF = reader.numFrames();
-        // V60.0: Aumento de límite para animaciones fluidas (64 cuadros max)
-        // Solo saltamos frames si el GIF es extremadamente pesado para Bedrock
-        const targetFrames = 64; 
-        const skip = Math.max(1, Math.floor(totalF / targetFrames)); 
+        // V65.0: Optimización Elite (20 cuadros max para ligereza total)
+        const targetFrames = 20; 
+        const skip = Math.max(1, Math.round(totalF / targetFrames)); 
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
         tempCanvas.width = width; tempCanvas.height = height;
@@ -555,10 +554,12 @@ async function extractGifFrames(blob) {
 
         let finalFPS = 10;
         if (totalDelay > 0) {
-            // Formula: (Num_Cuadros_Finales * 100) / Delay_Total_Original
-            finalFPS = (frameBlobs.length * 100) / totalDelay;
+            // Formula Maestra CDR (V328): 
+            // (Cuadros_Extraídos / Total_GIF) * (100 / Delay_Promedio) * 10
+            // Esta fórmula compensa los cuadros eliminados bajando la velocidad
+            const totalDurationSec = totalDelay / 100;
+            finalFPS = frameBlobs.length / totalDurationSec;
         } else {
-            // Si el GIF no tiene delay registrado, aplicar un default sano
             finalFPS = Math.max(1, Math.min(24, frameBlobs.length));
         }
 
