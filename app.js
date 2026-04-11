@@ -549,8 +549,15 @@ async function extractGifFrames(blob) {
         }
 
         // --- AUTO-DETECCIÓN DE FPS (V325 DURATION-SYNC) ---
-        // Formula: (Num_Cuadros_Finales * 100) / Delay_Total_Original
-        const finalFPS = (frameBlobs.length * 100) / totalDelay;
+        let finalFPS = 10;
+        if (totalDelay > 0) {
+            // Formula: (Num_Cuadros_Finales * 100) / Delay_Total_Original
+            finalFPS = (frameBlobs.length * 100) / totalDelay;
+        } else {
+            // Si el GIF no tiene delay registrado, aplicar un default sano según la cantidad de cuadros resultante
+            finalFPS = Math.max(1, Math.min(24, frameBlobs.length));
+        }
+
         ui.animFPS.value = Math.max(1, Math.min(24, Math.round(finalFPS)));
         document.getElementById('fps-val').innerText = ui.animFPS.value;
         return { width, height, frames: frameBlobs, skipRatio: skip };
