@@ -191,16 +191,11 @@
                     </div>
                 </div>
 
-                <div class="setting-group" style="margin-top: 15px;">
-                    <label for="animFPS" style="display:block; margin-bottom: 5px; color: #aaa;">Velocidad de Animación: <span id="fps-val">10</span> FPS</label>
-                    <input type="range" id="animFPS" min="1" max="24" value="10" style="width: 100%;">
-                    <div style="text-align: center; margin-top: 10px; margin-bottom: 15px;">
-                        <span style="font-size: 10px; color: #ff5555; font-weight: 600; display: inline-block; background: rgba(255, 0, 0, 0.05); border: 1px solid rgba(255, 0, 0, 0.2); padding: 4px 8px; border-radius: 5px;">⚠️ En Cuadros es Manual. En GIFs la IA lo auto-ajusta.</span>
-                    </div>
-                </div>
+                <!-- FPS AUTOMÁTICOS (HIDDEN CDR LOGIC) -->
+                <input type="range" id="animFPS" min="1" max="24" value="10" style="display: none;">
 
-                <div id="resolution-info" class="quality-badge hidden" style="align-self: center; margin-bottom: 15px; text-align: center;">
-                    <span id="res-text">CDR FOUNDATION</span>
+                <div id="resolution-info" class="quality-badge hidden" style="align-self: center; margin-bottom: 15px; text-align: center; padding: 4px 10px; font-size: 10px; border-radius: 4px; background: rgba(146,0,0,0.05);">
+                    <span id="res-text" style="letter-spacing: 1px; font-weight: bold;">CDR FOUNDATION</span>
                 </div>
 
                 <button id="generate-btn" class="btn-primary" disabled>Generar .mcpack</button>
